@@ -1,7 +1,7 @@
 from django.conf.urls import patterns, url
 from django.contrib import admin
 
-from apps.mepin import views
+from apps.custom.mepin import views
 
 urlpatterns = patterns('',
     url(r'^$', views.index, name='index'),

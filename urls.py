@@ -4,7 +4,7 @@ from django.conf.urls.i18n import i18n_patterns
 from django.conf.urls.static import static
 
 from oscar.app import application
-from oscar.views import handler500, handler404, handler403  # noqa
+from oscar.views import handler500, handler404, handler403
 
 # from apps.sitemaps import base_sitemaps
 # from apps.api import *
@@ -17,19 +17,32 @@ urlpatterns = [
     # Include admin as convenience. It's unsupported and you should
     # use the dashboard
     url(r'^admin/', include(admin.site.urls)),
-    # url(r'^api/', include('apps.api.urls')),
-    # url(r'^library/', include('apps.library.urls')),
+
+    # API module
+    url(r'^api/', include('apps.custom.api.urls')),
+
+    # Library doesn't have any view
+    # url(r'^library/', include('apps.custom.library.urls')),
+
+    # Mepin secure payments API
     # url(r'^mepin/', include('apps.mepin.urls')),
+
     # i18n URLS need to live outside of i18n_patterns scope of the shop
     url(r'^i18n/', include('django.conf.urls.i18n')),
-    # include a basic sitemap
+
+    # Basic sitemap
     # url(r'^sitemap\.xml$', 'django.contrib.sitemaps.views.index', {
     #     'sitemaps': base_sitemaps}),
     # url(r'^sitemap-(?P<section>.+)\.xml$',
     #     'django.contrib.sitemaps.views.sitemap', {'sitemaps': base_sitemaps}),
     #
-    # url(r'^ajax/$', 'apps.ajax.home.loadItems'),
+
+    # AJAX
+    # url(r'^ajax/$', 'apps.custom.ajax.home.loadItems'),
+
+    # OAuth2 integration
     url(r'^oauth2/', include('provider.oauth2.urls', namespace='oauth2')),
+
     # Use swagger to show the API
     url(r'^docs/', include('rest_framework_swagger.urls')),
 ]
@@ -37,7 +50,7 @@ urlpatterns = [
 # Prefix Oscar URLs with language codes
 urlpatterns += i18n_patterns('',
     url(r'^info/', include('apps.custom.info.urls')),
-    # url(r'^panel/', include('apps.panel.urls')),
+    url(r'^panel/', include('apps.custom.panel.urls')),
     # Custom functionality to allow dashboard users to be created
     # url(r'gateway/', include('apps.gateway.urls')),
 

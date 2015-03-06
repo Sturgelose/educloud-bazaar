@@ -3,7 +3,6 @@ from django.contrib.auth.models import User, Group
 from oscar.core.loading import get_class, get_model
 from django.conf import settings
 import datetime
-from autoslug import AutoSlugField
 # Create your models here.
 
 Product = get_model('catalogue', 'Product')

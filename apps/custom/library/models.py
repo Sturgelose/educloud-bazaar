@@ -1,11 +1,12 @@
 from django.db import models
-from oscar.core.loading import get_class, get_model
+from oscar.core.loading import get_model
 from django.contrib.auth import get_user_model
-import datetime
+from django.conf import settings
 
-User = get_user_model()
+User = settings.AUTH_USER_MODEL
 Product = get_model('catalogue', 'Product')
 Basket = get_model('basket', 'Basket')
+
 
 class ProductPurchased(models.Model):
     owner = models.ForeignKey(User)

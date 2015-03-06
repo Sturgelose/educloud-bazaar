@@ -1,5 +1,5 @@
 from django.contrib import admin
-from apps.library.models import ProductPurchased
+from models import ProductPurchased
 
 # Register your models here.
 class library(admin.ModelAdmin):

@@ -1,31 +1,24 @@
-import urllib2, os, sys
-import html2text
-from PIL import Image, ImageChops
-from django.views.decorators.csrf import csrf_exempt
 import uuid as libuuid
-from rest_framework.renderers import UnicodeJSONRenderer
-from django.http import HttpResponse
-#from django.contrib.auth.models import User, Group
+
+import html2text
+from django.views.decorators.csrf import csrf_exempt
+
+# from django.contrib.auth.models import User, Group
 from django.contrib.auth import get_user_model
-from django.db.models import Count
 from rest_framework import viewsets
-from apps.api.serializers import UserSerializer, GroupSerializer, APINodeSerializer, ProductSerializer, ProductTypeSerializer, SubjectSerializer, ProductPurchasedSerializer, ProductFormatSerializer
+from serializers import APINodeSerializer, ProductSerializer, ProductTypeSerializer, \
+    SubjectSerializer, ProductPurchasedSerializer, ProductFormatSerializer
 from django.db import IntegrityError
 from rest_framework.views import APIView
-from rest_framework import authentication, permissions
 from rest_framework.response import Response
 #from apps.catalogue import models as catalogueModels
-from oscar.core.loading import get_class, get_model
-from apps.api import models
+from oscar.core.loading import get_model
+from . import models
 from datetime import datetime
-import json
 from django.template.defaultfilters import slugify
-from rest_framework import authentication, permissions
 from rest_framework.authentication import OAuth2Authentication, BasicAuthentication, SessionAuthentication
-from apps.api.permissions import IsOwner
-from rest_framework import generics
+from permissions import IsOwner
 from rest_framework import permissions
-from django.http import Http404
 
 from errorcodes import *
 
@@ -43,8 +36,8 @@ ProductPurchased = get_model('library', 'ProductPurchased')
 ProductFormat = get_model('catalogue', 'ProductFormat')
 
 #success messages:
-postSuccess = {"message" : "Operation successful."}
-putSuccess = {"message" : "Operation successful."}
+postSuccess = {"message": "Operation successful."}
+putSuccess = {"message": "Operation successful."}
 
 # Create your views here.
 # API-views
@@ -58,6 +51,7 @@ class ProductTypeList(viewsets.ReadOnlyModelViewSet):
     paginate_by = 100
     permission_classes = (permissions.IsAuthenticatedOrReadOnly,)
 
+
 class SubjectList(viewsets.ReadOnlyModelViewSet):
     """
     API endpoint that lists the subjects available for POST and PUT calls
@@ -67,6 +61,7 @@ class SubjectList(viewsets.ReadOnlyModelViewSet):
     serializer_class = SubjectSerializer
     paginate_by = 100
     permission_classes = (permissions.IsAuthenticatedOrReadOnly,)
+
 
 class ProductFormatList(viewsets.ReadOnlyModelViewSet):
     """
@@ -96,21 +91,21 @@ class CMSView(APIView):
     def splitUrl(self, url):
         splitpath = url.lower().split('/')
         splitpath = splitpath[0:]
-        splitpath = filter(None,splitpath)
+        splitpath = filter(None, splitpath)
 
         for x in range(0, len(splitpath)):
-            splitpath[x] = slugify(splitpath[x])    #remove bad characters from url
+            splitpath[x] = slugify(splitpath[x])  #remove bad characters from url
         return splitpath
 
     def slugifyWholeUrl(self, url):
         urlarray = self.splitUrl(url)
-        url= urlarray[0]
+        url = urlarray[0]
         for i in range(1, len(urlarray)):
             url += "/" + urlarray[i]
         return url
 
     #check whether there is empty strings in the url
-    def isValidUrl(self,path):
+    def isValidUrl(self, path):
         splitpath = self.trimTheUrl(path)
         print splitpath
         if len(splitpath) == 0:
@@ -118,9 +113,9 @@ class CMSView(APIView):
 
 
     #trim unnecessary part of url
-    def trimTheUrl(self,path):
+    def trimTheUrl(self, path):
         url = path
-        url = url[len("/api/cms/"):] #slice the useless part away
+        url = url[len("/api/cms/"):]  #slice the useless part away
         #slice the trailing:
         url = url.strip("/")
         return url
@@ -131,7 +126,7 @@ class CMSView(APIView):
     #make sure there isn't items in the middle of the given path
     def checkIfItemsInPostPath(self, path):
         urlTokens = self.splitUrl(path)
-        pathSoFar = "" #urlTokens[0]
+        pathSoFar = ""  #urlTokens[0]
         for i in range(0, len(urlTokens)):
             print pathSoFar
             pathSoFar = pathSoFar.strip("/")
@@ -161,7 +156,7 @@ class CMSView(APIView):
         if models.APINode.objects.filter(uniquePath=pathSoFar, objectType="collection").exists() == False:
             raise RootError()
 
-        for i in range(1, len(urlTokens)+1):
+        for i in range(1, len(urlTokens) + 1):
 
             try:
                 node = models.APINode.objects.get(uniquePath=pathSoFar, objectType="collection")
@@ -172,7 +167,7 @@ class CMSView(APIView):
                 #the collection exists, therefore it doesn't need to be created.
                 parentPathSoFar = pathSoFar
                 if i < len(urlTokens):
-                    pathSoFar += "/" + urlTokens[i] #move to the next
+                    pathSoFar += "/" + urlTokens[i]  #move to the next
 
             except models.APINode.DoesNotExist:
                 #the collection doesn't exist yet so create it:
@@ -183,7 +178,7 @@ class CMSView(APIView):
                 createdCollection.append(pathSoFar)
 
                 if i < len(urlTokens):
-                    pathSoFar += "/" + urlTokens[i] #move to the next
+                    pathSoFar += "/" + urlTokens[i]  #move to the next
 
         return unicode(createdCollection)
 
@@ -196,7 +191,7 @@ class CMSView(APIView):
             raise IncorrectBooleanField(fieldName)
 
     #check whether json has items or not
-    def checkJsonData(self,request):
+    def checkJsonData(self, request):
         theList = request.DATA
         if len(theList) == 0:
             raise NoJSON()
@@ -241,15 +236,17 @@ class CMSView(APIView):
                 if x["price"] < 0:
                     raise BadPrice()
 
-
-
                 visible = self.str2Bool(x["visible"], "visible")
                 stripped_description = html2text.html2text(x["description"])
-                product = Product(title=x["title"], upc=createdUPC, description=stripped_description, materialUrl=x["materialUrl"],
-                                  moreInfoUrl=moreInfoUrl,  uuid=x["uuid"], version=x["version"],
-                                  maximumAge=x["maximumAge"], minimumAge=x["minimumAge"], contentLicense=x["contentLicense"],
-                                  dataLicense=x["dataLicense"], copyrightNotice=x["copyrightNotice"], attributionText=x["attributionText"],
-                                  attributionURL=x["attributionURL"],visible=visible, product_class=itemClass, product_format=pformat)
+                product = Product(title=x["title"], upc=createdUPC, description=stripped_description,
+                                  materialUrl=x["materialUrl"],
+                                  moreInfoUrl=moreInfoUrl, uuid=x["uuid"], version=x["version"],
+                                  maximumAge=x["maximumAge"], minimumAge=x["minimumAge"],
+                                  contentLicense=x["contentLicense"],
+                                  dataLicense=x["dataLicense"], copyrightNotice=x["copyrightNotice"],
+                                  attributionText=x["attributionText"],
+                                  attributionURL=x["attributionURL"], visible=visible, product_class=itemClass,
+                                  product_format=pformat)
 
 
                 #Add fullfilment into database
@@ -264,7 +261,7 @@ class CMSView(APIView):
                     product.contributionDate = None
 
                 if self.checkIfAlreadyInDb(path + "/" + slugify(product.uuid)):
-                    raise ObjectAlreadyExists( path + "/" + slugify(product.uuid) )
+                    raise ObjectAlreadyExists(path + "/" + slugify(product.uuid))
 
                 #Download icon if one is specified
                 product.iconUrl = x["iconUrl"]
@@ -285,9 +282,9 @@ class CMSView(APIView):
 
                 for subject in subs:
                     if Category.objects.filter(slug=subject).exists():
-                            category = Category.objects.get(slug=subject)
-                            newProductCategory = ProductCategory(product=product, category=category)
-                            newProductCategory.save()
+                        category = Category.objects.get(slug=subject)
+                        newProductCategory = ProductCategory(product=product, category=category)
+                        newProductCategory.save()
                     else:
                         raise SubjectNotFound(subject)
 
@@ -337,9 +334,11 @@ class CMSView(APIView):
                 #TODO: THIS IS BAD. BUT IT IS NECESSARY TO FIX ONE BAD ZERO PRICE BUG FOR NOW. PLEASE FIX THIS
                 #TODO: ASAP. WE ARE SORRY ;__;
                 if x["price"] == 0:
-                    f = StockRecord(product=product, partner=author, price_excl_tax=0.01, price_retail=0.01, partner_sku=x["uuid"], num_in_stock=1)
+                    f = StockRecord(product=product, partner=author, price_excl_tax=0.01, price_retail=0.01,
+                                    partner_sku=x["uuid"], num_in_stock=1)
                 else:
-                    f = StockRecord(product=product, partner=author, price_excl_tax=x["price"], price_retail=x["price"], partner_sku=x["uuid"], num_in_stock=1)
+                    f = StockRecord(product=product, partner=author, price_excl_tax=x["price"], price_retail=x["price"],
+                                    partner_sku=x["uuid"], num_in_stock=1)
                 f.save()
                 createdStockRecords.append(f)
 
@@ -408,7 +407,7 @@ class CMSView(APIView):
 
 
     @csrf_exempt
-    def post(self,request):
+    def post(self, request):
 
         try:
             self.isValidUrl(request.path)
@@ -442,7 +441,7 @@ class CMSView(APIView):
         return Response(msg)
 
 
-    def put(self,request):
+    def put(self, request):
         try:
             self.isValidUrl(request.path)
             url = self.trimTheUrl(request.path)
@@ -470,7 +469,7 @@ class CMSView(APIView):
 
 
     #updates an existing Product with data provided in the request
-    def updateExistingItem(self,obj, DATA):
+    def updateExistingItem(self, obj, DATA):
         obj.title = DATA["title"]
         obj.description = html2text.html2text(DATA["description"])
         obj.materialUrl = DATA["materialUrl"]
@@ -588,8 +587,8 @@ class CMSView(APIView):
         for lang in langList:
             #check if the language is already in db, if not create it
             if Language.objects.filter(name=lang).exists():
-                    l = Language.objects.get(name=lang)
-                    l.hasLanguage.add(obj)
+                l = Language.objects.get(name=lang)
+                l.hasLanguage.add(obj)
             else:
                 langEntry = Language.create()
                 langEntry.name = lang
@@ -637,8 +636,6 @@ class CMSView(APIView):
         return UPC
 
 
-
-
 # find purchased products of the user with oid
 class PurchasedProductsView(APIView):
     """
@@ -676,8 +673,6 @@ class PurchasedProductsView(APIView):
             d["message"] = "Error: No oid provided. Please provide json-field in form { 'oid': '1234'}"
             d["errorcode"] = 102
             return Response(d, status=400)
-
-
 
 
 #get product metadata for the lms

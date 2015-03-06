@@ -1,4 +1,4 @@
-import os, sys
+import os,sys
 
 # Path helper
 PROJECT_DIR = os.path.dirname(__file__)
@@ -34,7 +34,6 @@ DATABASES = {
         'ATOMIC_REQUESTS': True
     }
 }
-
 
 CACHES = {
     'default': {
@@ -154,8 +153,6 @@ MIDDLEWARE_CLASSES = (
     'djangosecure.middleware.SecurityMiddleware',
 
 )
-
-DEBUG_TOOLBAR_PATCH_SETTINGS = False
 
 ROOT_URLCONF = 'urls'
 
@@ -309,10 +306,10 @@ INSTALLED_APPS = [
                      'template_timings_panel',
                      'compressor',  # Oscar's templates use compressor
                      # 'apps.gateway',  # For allowing dashboard access
-                     # 'apps.api',
-                     # 'apps.panel',
+                     'apps.custom.api',
+                     'apps.custom.panel',
                      'apps.custom.info',
-                     # 'apps.library',
+                     'apps.custom.library',
                      'rest_framework',
                      'provider',
                      'provider.oauth2',
@@ -320,18 +317,19 @@ INSTALLED_APPS = [
                      'cookie_message',
                      'rest_framework_swagger',
                      'json_field',  # https://github.com/derek-schaefer/django-json-field
+                     'requests'
                  ] + get_core_apps(
     [
-     'apps.contrib.catalogue',
-     #'apps.search',
-     #'apps.order',
-     'apps.contrib.customer',
-     #'apps.checkout'
+        'apps.contrib.catalogue',
+        # 'apps.search',
+        #'apps.order',
+        'apps.contrib.customer',
+        #'apps.checkout'
     ])
 
 # # Haystack settings
 # HAYSTACK_CONNECTIONS = {
-#     'default': {
+# 'default': {
 #         'ENGINE': 'haystack.backends.solr_backend.SolrEngine',
 #         'URL': 'http://127.0.0.1:8983/solr/',
 #         'INCLUDE_SPELLING': True,
@@ -428,7 +426,7 @@ OSCAR_DASHBOARD_NAVIGATION += [
                 'label': 'Add Product',
                 'url_name': 'test',
             },
-         ]
+        ]
     },
 ]
 
@@ -533,3 +531,5 @@ SHIBBOLETH_LOGOUT_REDIRECT_URL = '/'
 LOCALE_PATHS = (
     os.path.join(os.path.dirname(__file__), 'locale'),
 )
+
+TEST_RUNNER = 'django.test.runner.DiscoverRunner'

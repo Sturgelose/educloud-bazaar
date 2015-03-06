@@ -1,11 +1,8 @@
-from django.conf.urls import patterns, url
 from django.conf.urls import url, patterns, include
-from rest_framework import viewsets
-from django.contrib import admin
 from rest_framework import viewsets, routers
 from django.contrib.auth.models import User, Group
-from oscar.core.loading import get_class, get_model
-from apps.api import views
+
+from . import views
 
 
 class UserViewSet(viewsets.ModelViewSet):

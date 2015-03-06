@@ -1,6 +1,6 @@
 from django.contrib.auth.models import User, Group
 from rest_framework import serializers
-from apps.api.models import APINode
+from models import APINode
 from oscar.core.loading import get_class, get_model
 
 Product = get_model('catalogue', 'Product')
