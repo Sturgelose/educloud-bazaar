@@ -1,12 +1,7 @@
 from django.core.management.base import BaseCommand, CommandError
 from oscar.core.loading import get_class, get_model
 from django.template.defaultfilters import slugify
-
-
-Language = get_model('catalogue', 'Language')
-ProductType = get_model('catalogue', 'ProductClass')
-ProductFormat = get_model('catalogue', 'ProductFormat')
-Subject = get_model('catalogue', 'Category')
+from apps.contrib.catalogue.models import Language, ProductClass as ProductType, ProductFormat, Category as Subject
 
 languages = [
 'aa', #	Afar
@@ -242,16 +237,14 @@ class Command(BaseCommand):
         qs = Subject.objects.all()
         for subject in subjects:
             if not qs.filter(name=subject).exists():
-                highest = Subject.objects.latest('id').path
+                try:
+                    highest = Subject.objects.latest('id').path
+                    path = int(highest)
+                except:
+                    path = 0
 
-                # Remove 0s
-                pathStr = highest.replace("0", "")
-                path = int(pathStr)
                 path = path + 1
-                pathStr = str(path)
-
-                while(pathStr.count() < 4):
-                    pathStr = "0" + pathStr
+                pathStr = str(path).zfill(4)
 
                 newSubject = Subject(name=subject, path = pathStr, depth = 1, slug=slugify(subject), full_name=subject)
                 newSubject.save()
