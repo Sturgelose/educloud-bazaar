@@ -38,7 +38,7 @@ urlpatterns = [
     #
 
     # AJAX
-    # url(r'^ajax/$', 'apps.custom.ajax.home.loadItems'),
+    url(r'^ajax/$', 'apps.custom.ajax.home.loadItems'),
 
     # OAuth2 integration
     url(r'^oauth2/', include('provider.oauth2.urls', namespace='oauth2')),

@@ -17,7 +17,7 @@ class Product(AbstractProduct):
     maximumAge = models.IntegerField(null=True)
     minimumAge = models.IntegerField(null=True)
     product_format = models.ForeignKey(
-        'catalogue.ProductFormat', null=True, on_delete=models.PROTECT,
+        'ProductFormat', null=True, on_delete=models.PROTECT,
         verbose_name=_('Product Format'), related_name="products",
         help_text=_("Choose what is product format"))
     contentLicense = models.CharField(max_length=4000,
