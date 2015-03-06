@@ -2,7 +2,7 @@ from django.shortcuts import render, get_object_or_404
 from django.contrib.auth import authenticate
 from django.http import HttpResponse
 from django.core.exceptions import PermissionDenied
-from django.contrib.auth.models import User
+from django.contrib.auth import get_user_model
 from django.template import RequestContext, loader
 from oscar.core.loading import get_class, get_model
 
@@ -16,7 +16,7 @@ Language = get_model('catalogue', 'language')
 def index(request):
     if not request.user.is_authenticated():
         raise PermissionDenied()
-
+    User = get_user_model()
     user = User.objects.get(username=request.user.username)
     try:
         userPartner = Partner.objects.get(users=user)
