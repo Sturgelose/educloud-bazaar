@@ -35,13 +35,13 @@ nosetests.xml
 /.tox/*
 
 # Site specific
-/settings_local.py
-/*.sqlite
-/assets/
-/public/
-/whoosh_index/
-/logs/
-/build/
+settings_local.py
+*.sqlite
+assets/
+public/
+whoosh_index/
+logs/
+build/
 
 # Frontend dev files
 *.scssc
