@@ -10,11 +10,17 @@ Node = get_model('api', 'APINode')
 
 class Command(BaseCommand):
     args = '<username  ...>'
-    help = 'Closes the specified poll for voting'
+    help = 'creates a new CMS'
 
     def handle(self, *args, **options):
-        for u in args:
-            username = u
+        global username
+        # Check if we have arguments
+        if args:
+            for u in args:
+                username = u
+        else:
+            self.stdout.write('Wrong arguments. \nUsage: %s' % self.args)
+            return 0
 
         username = slugify(username)
 
