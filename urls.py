@@ -6,7 +6,7 @@ from django.conf.urls.static import static
 from oscar.app import application
 from oscar.views import handler500, handler404, handler403
 
-# from apps.sitemaps import base_sitemaps
+from apps.custom.sitemaps import base_sitemaps
 # from apps.api import *
 # from apps.test_shibboleth import views
 
@@ -31,11 +31,11 @@ urlpatterns = [
     url(r'^i18n/', include('django.conf.urls.i18n')),
 
     # Basic sitemap
-    # url(r'^sitemap\.xml$', 'django.contrib.sitemaps.views.index', {
-    #     'sitemaps': base_sitemaps}),
-    # url(r'^sitemap-(?P<section>.+)\.xml$',
-    #     'django.contrib.sitemaps.views.sitemap', {'sitemaps': base_sitemaps}),
-    #
+    url(r'^sitemap\.xml$', 'django.contrib.sitemaps.views.index', {
+         'sitemaps': base_sitemaps}),
+     url(r'^sitemap-(?P<section>.+)\.xml$',
+         'django.contrib.sitemaps.views.sitemap', {'sitemaps': base_sitemaps}),
+
 
     # AJAX
     url(r'^ajax/$', 'apps.custom.ajax.home.loadItems'),
@@ -51,6 +51,7 @@ urlpatterns = [
 urlpatterns += i18n_patterns('',
     url(r'^info/', include('apps.custom.info.urls')),
     url(r'^panel/', include('apps.custom.panel.urls')),
+
     # Custom functionality to allow dashboard users to be created
     # url(r'gateway/', include('apps.gateway.urls')),
 
