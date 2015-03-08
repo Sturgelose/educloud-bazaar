@@ -1,3 +1,4 @@
+pysolr
 html2text
 requests
 Babel==1.3

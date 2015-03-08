@@ -43,6 +43,9 @@ To setup vagrant and the DE perform the following steps:
 
 You can also see more commands of python using `python manage.py`
 
+### Pre requirements
+* sudo apt-get install libjpeg-dev
+
 # Robot Framework tests
 
 Location [educloud-bazaar/robot](https://github.com/koulutuksenpilvivayla/pilvivayla-basaari/tree/master/robot)

@@ -7,10 +7,12 @@ from oscar.app import application
 from oscar.views import handler500, handler404, handler403
 
 from apps.custom.sitemaps import base_sitemaps
-# from apps.api import *
+# from apps.custom.api import *
 # from apps.test_shibboleth import views
 
+from django.views.generic import RedirectView
 from django.contrib import admin
+
 admin.autodiscover()
 
 urlpatterns = [
@@ -32,9 +34,9 @@ urlpatterns = [
 
     # Basic sitemap
     url(r'^sitemap\.xml$', 'django.contrib.sitemaps.views.index', {
-         'sitemaps': base_sitemaps}),
-     url(r'^sitemap-(?P<section>.+)\.xml$',
-         'django.contrib.sitemaps.views.sitemap', {'sitemaps': base_sitemaps}),
+        'sitemaps': base_sitemaps}),
+    url(r'^sitemap-(?P<section>.+)\.xml$',
+        'django.contrib.sitemaps.views.sitemap', {'sitemaps': base_sitemaps}),
 
 
     # AJAX
@@ -45,22 +47,24 @@ urlpatterns = [
 
     # Use swagger to show the API
     url(r'^docs/', include('rest_framework_swagger.urls')),
+
+    url(r"^/", RedirectView.as_view(url='/catalogue/')),
 ]
 
 # Prefix Oscar URLs with language codes
 urlpatterns += i18n_patterns('',
-    url(r'^info/', include('apps.custom.info.urls')),
-    url(r'^panel/', include('apps.custom.panel.urls')),
+                             url(r'^info/', include('apps.custom.info.urls')),
+                             url(r'^panel/', include('apps.custom.panel.urls')),
 
-    # Custom functionality to allow dashboard users to be created
-    # url(r'gateway/', include('apps.gateway.urls')),
+                             # Custom functionality to allow dashboard users to be created
+                             # url(r'gateway/', include('apps.gateway.urls')),
 
-    # Oscar's normal URLs
-    url(r'', include(application.urls)),
+                             # Oscar's normal URLs
+                             url(r'', include(application.urls)),
 )
 # Shibboleth
 urlpatterns += patterns('',
-    url(r'^shib/', include('apps.contrib.customer.urls', namespace='shibboleth')),
+                        url(r'^shib/', include('apps.contrib.customer.urls', namespace='shibboleth')),
 )
 
 if settings.DEBUG:
@@ -78,5 +82,5 @@ if settings.DEBUG:
     ]
     # test_shibboleth attributes
     urlpatterns += patterns('',
-        # url(r'^shibboleth/login', 'apps.test_shibboleth.views.foo'),
+                            # url(r'^shibboleth/login', 'apps.test_shibboleth.views.foo'),
     )

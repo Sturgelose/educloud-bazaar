@@ -1,32 +1,43 @@
+from django.db import models
 import tempfile
-
+import os
 from oscar.apps.catalogue.abstract_models import *
-
-from django.utils.translation import ugettext_lazy as _
+from django.template.defaultfilters import slugify
+from django.utils.translation import ugettext_lazy as _, pgettext_lazy
 
 
 StockRecord = get_model('partner', 'StockRecord')
 
 
+class Category(AbstractCategory):
+    pass
+
+
+class ProductClass(AbstractProductClass):
+    pass
+
+
+class ProductCategory(AbstractProductCategory):
+    pass
+
+
 class Product(AbstractProduct):
-    uuid = models.CharField(max_length=50, blank=True)
+    uuid = models.CharField(max_length=50)
     materialUrl = models.URLField(blank=True)
     moreInfoUrl = models.URLField(blank=True, null=True)
-    version = models.CharField(max_length=50, blank=True)
+    version = models.CharField(max_length=50)
     contributionDate = models.DateField(null=True)
     maximumAge = models.IntegerField(null=True)
     minimumAge = models.IntegerField(null=True)
     product_format = models.ForeignKey(
-        'ProductFormat', null=True, on_delete=models.PROTECT,
+        'catalogue.ProductFormat', null=True, on_delete=models.PROTECT,
         verbose_name=_('Product Format'), related_name="products",
         help_text=_("Choose what is product format"))
-    contentLicense = models.CharField(max_length=4000,
-                                      blank=True)
-    # Apache limit from www.boutell.com/newfaq/misc/urllength.html is 4000
-    dataLicense = models.CharField(max_length=4000, blank=True)
-    copyrightNotice = models.CharField(max_length=4000, blank=True)
-    attributionText = models.TextField(max_length=4000, blank=True)
-    attributionURL = models.CharField(max_length=4000, blank=True)
+    contentLicense = models.CharField(max_length=4000)  # Apache limit from www.boutell.com/newfaq/misc/urllength.html
+    dataLicense = models.CharField(max_length=4000)
+    copyrightNotice = models.CharField(max_length=4000)
+    attributionText = models.TextField()
+    attributionURL = models.CharField(max_length=4000)
     visible = models.BooleanField(default=False)
     iconUrl = models.URLField(null=True)
     upload_path = '/media/icons'
@@ -34,17 +45,18 @@ class Product(AbstractProduct):
 
     def saveIcon(self, *args, **kwargs):
         if self.iconUrl:
-            import urllib2
-            import os
-            from PIL import Image
-
+            import urllib2, os
+            from urlparse import urlparse
+            from PIL import Image, ImageChops
             try:
                 req = urllib2.Request(self.iconUrl)
                 response = urllib2.urlopen(req, None, 15)
 
+                iconFile = self.upc + self.iconUrl[-4:]
                 # TODO .jpeg?
                 sPath = os.path.abspath(os.path.join(os.path.dirname(__file__), os.pardir, os.pardir))
-
+                filename = sPath + '/public/media/icons/' + iconFile
+        
                 f = tempfile.NamedTemporaryFile(delete=False)
                 f.write(response.read())
                 f.close()
@@ -63,11 +75,9 @@ class Product(AbstractProduct):
 
                 fileFolder = sPath + '/public/media/icons/'
                 filename = self.upc + ".png"
-                final_thumb = Image.new(mode='RGBA', size=size,
-                                        color=(255, 255, 255, 0))  # create the image object to be the final product
-                final_thumb.paste(image, offset_tuple)  # paste the thumbnail into the full sized image
-                final_thumb.save(fileFolder + filename,
-                                 'PNG')  # save (the PNG format will retain the alpha band unlike JPEG)
+                final_thumb = Image.new(mode='RGBA',size=size,color=(255,255,255,0)) #create the image object to be the final product
+                final_thumb.paste(image, offset_tuple) #paste the thumbnail into the full sized image
+                final_thumb.save(fileFolder + filename,'PNG') #save (the PNG format will retain the alpha band unlike JPEG)
 
                 self.icon = os.path.join(self.upload_path, filename)
                 super(Product, self).save()
@@ -88,7 +98,9 @@ class Product(AbstractProduct):
 
         return url
 
+
     get_media.short_description = _("Embedded media")
+
 
     def get_icon_url(self):
         if self.icon is not None:
@@ -100,10 +112,16 @@ class Product(AbstractProduct):
 
         return owner.name
 
+    def get_min_grade(self):
+        product = StockRecord.objects.get(product=self)
+        owner = product.partner
+        return owner.name
+
     def get_max_grade(self):
+        grade = 0
         if self.maximumAge >= 15:
             grade = 9
-        elif self.maximumAge <= 7:
+        elif self.maximumAge <=7:
             grade = 1
         else:
             grade = self.maximumAge - 6
@@ -111,13 +129,17 @@ class Product(AbstractProduct):
         return grade
 
     def get_min_grade(self):
+        grade = 0
         if self.minimumAge <= 7:
             grade = 1
         elif self.minimumAge >= 15:
-            grade = 9
+            grade=9
         else:
-            grade = self.minimumAge - 6
+            grade = self.minimumAge -6
+
         return grade
+
+
 
 
 class Language(models.Model):
@@ -158,7 +180,6 @@ class ProductFormat(models.Model):
         obj = cls()
         return obj
 
-
 class Tags(models.Model):
     name = models.CharField(max_length=128)
     createdAt = models.DateTimeField(auto_now_add=True)
@@ -172,6 +193,30 @@ class Tags(models.Model):
     def create(cls):
         obj = cls()
         return obj
+
+
+class ProductAttribute(AbstractProductAttribute):
+    pass
+
+
+class ProductAttributeValue(AbstractProductAttributeValue):
+    pass
+
+
+class AttributeOptionGroup(AbstractAttributeOptionGroup):
+    pass
+
+
+class AttributeOption(AbstractAttributeOption):
+    pass
+
+
+class Option(AbstractOption):
+    pass
+
+
+class ProductImage(AbstractProductImage):
+    pass
 
 
 from oscar.apps.catalogue.models import *

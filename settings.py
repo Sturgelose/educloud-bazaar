@@ -7,11 +7,11 @@ location = lambda x: os.path.join(
 
 USE_TZ = True
 
+ALLOWED_HOSTS = ['localhost', '127.0.0.1']
+
 DEBUG = True
 TEMPLATE_DEBUG = True
 SQL_DEBUG = True
-
-ALLOWED_HOSTS = []
 
 ADMINS = (
     ('Admin Adminton', 'admin@admin.com'),
@@ -126,8 +126,8 @@ TEMPLATE_CONTEXT_PROCESSORS = (
     'oscar.apps.customer.notifications.context_processors.notifications',
     'oscar.core.context_processors.metadata',
     # Shibboleth
-    # 'apps.customer.context_processors.login_link',
-    # 'apps.customer.context_processors.logout_link',
+    'apps.contrib.customer.context_processors.login_link',
+    'apps.contrib.customer.context_processors.logout_link',
 )
 
 MIDDLEWARE_CLASSES = (
@@ -305,11 +305,11 @@ INSTALLED_APPS = [
                      'debug_toolbar',  # Django debug toolbar
                      'template_timings_panel',
                      'compressor',  # Oscar's templates use compressor
-                     # 'apps.gateway',  # For allowing dashboard access
                      'apps.custom.api',
                      'apps.custom.panel',
                      'apps.custom.info',
                      'apps.custom.library',
+                     'apps.custom.ajax',
                      'rest_framework',
                      'provider',
                      'provider.oauth2',
@@ -317,30 +317,32 @@ INSTALLED_APPS = [
                      'cookie_message',
                      'rest_framework_swagger',
                      'json_field',  # https://github.com/derek-schaefer/django-json-field
-                     'requests'
+                     'requests',
+                     'pysolr',
                  ] + get_core_apps(
     [
         'apps.contrib.catalogue',
-        # 'apps.search',
+        'apps.contrib.search',
         #'apps.order',
         'apps.contrib.customer',
         #'apps.checkout'
+        #'apps.contrib.basket'
     ])
 
-# # Haystack settings
-# HAYSTACK_CONNECTIONS = {
-# 'default': {
-#         'ENGINE': 'haystack.backends.solr_backend.SolrEngine',
-#         'URL': 'http://127.0.0.1:8983/solr/',
-#         'INCLUDE_SPELLING': True,
-#     },
-# }
-
+# Haystack settings
 HAYSTACK_CONNECTIONS = {
-    'default': {
-        'ENGINE': 'haystack.backends.simple_backend.SimpleEngine',
+'default': {
+        'ENGINE': 'haystack.backends.solr_backend.SolrEngine',
+        'URL': 'http://127.0.0.1:8983/solr/',
+        'INCLUDE_SPELLING': True,
     },
 }
+
+# HAYSTACK_CONNECTIONS = {
+#     'default': {
+#         'ENGINE': 'haystack.backends.simple_backend.SimpleEngine',
+#     },
+# }
 
 # Bazaar User model
 AUTH_USER_MODEL = "user.User"
@@ -501,7 +503,7 @@ THUMBNAIL_DEBUG = True
 THUMBNAIL_KEY_PREFIX = 'bazaar-'
 
 # Use a custom KV store to handle integrity error
-THUMBNAIL_KVSTORE = 'oscar.sorl_kvstore.ConcurrentKVStore'
+# THUMBNAIL_KVSTORE = 'oscar.sorl_kvstore.ConcurrentKVStore'
 
 # Django 1.6 has switched to JSON serializing for security reasons, but it does not
 # serialize Models. We should resolve this by extending the
@@ -522,11 +524,12 @@ AUTHENTICATION_BACKENDS = (
 )
 
 LOGIN_REDIRECT_URL = '/accounts/profile/'
+LOGOUT_REDIRECT_URL = "/"
 
 # Shibboleth
 SHIBBOLETH_LOGIN_URL = 'https://bazaardev.educloudalliance.org/Shibboleth.sso/Login'
 SHIBBOLETH_LOGOUT_URL = 'https://bazaardev.educloudalliance.org/Shibboleth.sso/Logout'
-SHIBBOLETH_LOGOUT_REDIRECT_URL = '/'
+SHIBBOLETH_LOGOUT_REDIRECT_URL = LOGOUT_REDIRECT_URL
 
 LOCALE_PATHS = (
     os.path.join(os.path.dirname(__file__), 'locale'),
