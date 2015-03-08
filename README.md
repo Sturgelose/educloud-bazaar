@@ -44,7 +44,13 @@ To setup vagrant and the DE perform the following steps:
 You can also see more commands of python using `python manage.py`
 
 ### Pre requirements
-* sudo apt-get install libjpeg-dev
+* sudo apt-get install libjpeg-dev (to generate thumbnails)
+
+### Commands to start in Production
+* java -jar start.jar (in solr installation folder to start solr)
+* cd /path/to/project/root
+* gunicorn wsgi (to start gunicorn)
+* profit!
 
 # Robot Framework tests
 

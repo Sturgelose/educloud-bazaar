@@ -3,7 +3,7 @@ from django.contrib.auth.decorators import login_required
 from django.views import generic
 
 from oscar.apps.customer.app import CustomerApplication as CoreCustomerApplication
-from contrib.customer import views
+from apps.contrib.customer import views
 
 
 class CustomerApplication(CoreCustomerApplication):
